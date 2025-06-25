@@ -91,3 +91,17 @@ https://www.yourdomain.com
 4. Wait for validation → status becomes "Issued"
    
 5. Add the ACM in CloudFront
+
+
+## 🧹 Step 5: Cleanup (To Avoid Charges)
+   - ❌ Delete the S3 bucket (after backing up)
+
+   - ❌ Disable & delete CloudFront distribution
+
+   - ❌ Delete Route 53 hosted zone (or domain if no longer needed)
+
+   - ❌ Remove ACM cert (optional, it’s free)
+
+   - ❌ Delete records or disable auto-renewal for domain name (optional)
+
+

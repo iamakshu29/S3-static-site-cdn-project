@@ -1,128 +1,93 @@
-step-by-step manual hands-on notes for the Static Website Hosting Project using S3 + CloudFront + Route 53 — formatted for documentation or GitHub README.
+# 🧾 Manual Deployment: Static Website Hosting on AWS (S3 + CloudFront + Route 53)
 
-📘 Manual Hands-On Notes: Static Website Hosting on AWS
-Project Name: Static Website with CDN and Custom Domain
-Services Used: S3, CloudFront, Route 53, IAM, ACM
+This file contains step-by-step instructions to manually deploy a static website using AWS services.
 
-🪣 Step 1: Create and Configure S3 Bucket
-Go to S3 → Create Bucket
+---
 
-Name: your-bucket-name
+## 🪣 Step 1: Create and Configure S3 Bucket
 
-Region: (any)
+1. Go to **S3 → Create Bucket**
+   - Bucket name: `your-bucket-name`
+   - Region: Choose your region
+   - Uncheck **Block all public access**
+   - (Optional) Enable **Versioning**
 
-Uncheck "Block all public access"
+2. Upload your site files (e.g., `index.html`, `style.css`, `images/`).
 
-Enable Versioning (optional but good practice)
+3. Create the bucket.
 
-Upload Files
+---
 
-Upload index.html, CSS, JS, images
+## 📤 Step 2: Upload Website Files to the S3 Bucket
 
-Enable Static Website Hosting
+1. Open your bucket.
+2. Click **Upload** → Add files:
+   - `index.html`
+   - `style.css`
+   - `script.js`
+   - Any images or other assets
+3. Click **Upload** to complete.
 
-Go to Properties → Static Website Hosting
+---
 
-Enable
+## 🌐 Step 3: Setup CloudFront Distribution (CDN)
+1. Go to CloudFront → Create Distribution
 
-Set:
+2. Set:
 
-Index document: index.html
+    - Origin domain: Select your S3 bucket (not the website endpoint)
 
-Error document: 404.html (optional)
+    - Origin Access: Create Origin Access Control (OAC) and attach it
 
-Set Bucket Policy (for public access or CloudFront OAC)
-(Public access example:)
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": "*",
-      "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::your-bucket-name/*"
-    }
-  ]
-}
+    - Viewer Protocol Policy: Redirect HTTP to HTTPS
 
+    - Default Root Object: index.html
 
+    - (Optional) Add CNAME: www.yourdomain.com
 
-🌍 Step 2: Setup CloudFront CDN
-Create Distribution → Web (CloudFront)
+    - SSL Certificate: Select ACM certificate (must be in us-east-1)
 
-Origin Domain: Choose your S3 bucket (without website endpoint)
+3. Wait for the distribution to deploy (~10–15 mins)
 
-Origin Access: Create Origin Access Control (OAC) and attach policy
+```json
+https://<your-cloudfront-id>.cloudfront.net/index.html
+```
+## 📛 Step 3: Setup Custom Domain with Route 53
+1. Go to Route 53 → Hosted Zones → yourdomain.com
 
-Viewer Protocol Policy: Redirect HTTP to HTTPS
+2. Click Create Record
 
-Cache Policy: Use default (or modify if needed)
+    - Record Type: A
 
-Default Root Object: index.html
+    - Name: www (or blank for root domain)
 
-Price Class: Use Only US, Canada, and Europe (or broader)
+    - Alias: Yes
 
-Alternate Domain Name (CNAME): Add www.yourdomain.com (optional — see Route 53)
+    - Alias target: Select your CloudFront distribution from the dropdown
 
-SSL Certificate: Choose ACM certificate for your domain (must be in us-east-1)
+3. Wait for DNS propagation (~minutes to hours)
 
-Wait ~10–15 minutes for distribution to deploy
+4. Test:
 
-Test CloudFront Domain
-Visit:
-https://<distribution-id>.cloudfront.net/index.html
-
-
-📛 Step 3: Route 53 – Map Custom Domain
-Create or use existing Hosted Zone for yourdomain.com
-
-Create Record (Alias)
-
-Type: A
-
-Name: www (or leave blank for root domain)
-
-Alias → Yes
-
-Target: Select CloudFront distribution
-
-Test Custom Domain
-Visit:
+```json
 https://www.yourdomain.com
-🔐 Step 4: SSL Certificate with ACM
-Go to ACM (in us-east-1)
+```
 
-Request Public Certificate
+## 🔒 Step 4: Setup HTTPS with ACM
+1. Go to ACM → us-east-1 (N. Virginia)
 
-Add:
+2. Request a public certificate
 
-www.yourdomain.com
+    - Add: www.yourdomain.com
 
-yourdomain.com (optional)
+    - Choose DNS validation
 
-Choose DNS validation
+3. ACM will give a CNAME to validate
 
-Add Validation Record in Route 53
+    - Go to Route 53 → Hosted Zone → Create Record
 
-ACM gives you a CNAME to add
+    - Paste the ACM CNAME as provided
 
-Go to Route 53 → Hosted Zone → Create record
-
-Paste the ACM CNAME
-
-Wait for validation
-After it’s "Issued", you can attach it to CloudFront
-
-🧹 Step 5: Cleanup (To Avoid Charges)
-To avoid monthly AWS billing:
-
-❌ Delete the S3 bucket (after backing up)
-
-❌ Disable and delete the CloudFront distribution
-
-❌ Delete the Route 53 Hosted Zone (or records if domain stays)
-
-❌ Cancel domain auto-renew (optional)
-
-❌ Remove ACM certificate (optional)
-
+4. Wait for validation → status becomes "Issued"
+   
+5. Add the ACM in CloudFront

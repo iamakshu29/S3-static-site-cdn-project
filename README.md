@@ -21,8 +21,6 @@ This project demonstrates a real-world static website deployment on AWS using:
 - Configuring public access + bucket policies
 - HTTPS via ACM certificates
 
-## 💡 Architecture
-[Add architecture diagram or explain steps here]
 
 ## ⚙️ Cleanup Notes
 All AWS resources were deleted to avoid ongoing charges. This repository contains all the source code and architecture for future redeployment.
